@@ -9,7 +9,7 @@ import re
 BASE_URI = "http://museumsofindia.gov.in"
 
 def gen_museum_list(museum):
-	REPOS_URI = BASE_URI + "/repository/search/" + museum + "/collection/object_type"
+    REPOS_URI = BASE_URI + "/repository/search/" + museum + "/collection/object_type"
     init = 1
     stride = 50
     runs = 0
