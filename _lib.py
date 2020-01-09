@@ -6,9 +6,10 @@ from lxml import html
 import pandas as pd
 import re
 
+BASE_URI = "http://museumsofindia.gov.in"
+
 def gen_museum_list(museum):
-    BASE_URI = "http://museumsofindia.gov.in"
-    REPOS_URI = BASE_URI + "/repository/search/" + museum + "/collection/object_type"
+	REPOS_URI = BASE_URI + "/repository/search/" + museum + "/collection/object_type"
     init = 1
     stride = 50
     runs = 0
@@ -44,7 +45,6 @@ def csv_for_coll(coll_name, coll_url, to=0):
         to = int(coll_url.rsplit("/", 1)[1])
     else:
         coll_url = coll_url.rsplit("/", 1)[0] + "/" + str(to)
-    print(coll_url, coll_name)
     page = requests.get(coll_url)
     tree = html.fromstring(page.content)
     link_p = tree.find_class('user')
@@ -53,7 +53,7 @@ def csv_for_coll(coll_name, coll_url, to=0):
     data = []
     for l in link_new:
         cur_entry = dict()
-        uri = "http://museumsofindia.gov.in/" + l.cssselect('a')[0].get('href')
+        uri = BASE_URI + "/" + l.cssselect('a')[0].get('href')
         page = requests.get(uri)
         tree = html.fromstring(page.content)
         txts = tree.find_class('maroon_txt')
