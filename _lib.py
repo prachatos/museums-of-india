@@ -70,8 +70,9 @@ def csv_for_coll(coll_name, coll_url, to=0):
         k += 1
     pd_df = pd.DataFrame(data)
     os.makedirs("files", exist_ok=True)
-    pd_df.to_csv(os.path.join("files", re.sub(r"\s+", '-', coll_name) + "-" + str(to) + ".csv"), index=False)
-    print("Writing to", os.path.join("files", re.sub(r"\s+", '-', coll_name) + "-" + str(to) + ".csv"))
+    pd_df.columns = pd_df.columns.str.strip()
+    pd_df.to_csv(os.path.join("files", re.sub(r"\s+", '-', coll_name) + "-" + str(to) + ".tsv"), index=False, sep="\t")
+    print("Writing to", os.path.join("files", re.sub(r"\s+", '-', coll_name) + "-" + str(to) + ".tsv"))
     return len(data)
 	
 	
