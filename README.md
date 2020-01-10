@@ -22,6 +22,6 @@ This repository has 3 scripts - one for generating list of all museums (not necc
 
 # Generating CSV with data of items
 
-- This relies on the **config/collections.ini** file. The first parameter is the collection CSV generated in the first step and the second is a list of indices of museums to fetch data from. Any CSV that contains *<index,collection_name,collection_url,max_to_fetch>* should work.
+- This relies on the **config/collections.ini** file. The first parameter is the collection CSV generated in the first step and the second is a list of indices of museums to fetch data from. Any CSV that contains *<index,collection_name,collection_url,max_to_fetch>* should work. The final parameter specifies whether fields containing "Description" as the key should be included in the TSV.
 - *python gen_coll_data.py*
-- This generates a set of CSVs that contain data for each collection of items.
+- This generates a set of TSVs that contain data for each collection of items.
