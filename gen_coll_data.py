@@ -21,8 +21,13 @@ if __name__ == '__main__':
 		indices = [int(i) for i in config_parser.get('file', 'indices').split(',')]
 	except Exception:
 		indices = []
+	try:
+		nodesc = bool(int(config_parser.get('file', 'nodesc')))
+	except Exception:
+		nodesc = False
 	
 	count = 0
 	print("Generating data list from", filename)
-	count = gen_data_from_csvlist(filename, indices)
-	print("Generated", count, "data items for", len(indices), "collections")
+	count = gen_data_from_csvlist(filename, indices, nodesc)
+	indices_str = "all" if len(indices) == 0 else str(len(indices))
+	print("Generated", count, "data items for", indices_str, "collections")

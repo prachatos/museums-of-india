@@ -39,7 +39,7 @@ def gen_museum_list(museum):
     return count
 
 
-def csv_for_coll(coll_name, coll_url, to=0):
+def csv_for_coll(coll_name, coll_url, to=0, nodesc=False):
     # Reason why a "from" parameter isn't supported:
     # The parameters for the website have the pattern x/y/z
     # This indicates open the y_th page where each page
@@ -65,7 +65,9 @@ def csv_for_coll(coll_name, coll_url, to=0):
         for e in txts:
             key = e.cssselect('td')[0].text_content()
             val = e.getnext().cssselect('td')[0].text_content()
-            cur_entry[str(key)] = str(val)
+            if not (nodesc and "Description" in str(key)):
+                cur_entry[str(key)] = str(val)
+        cur_entry["url"] = uri
         data.append(cur_entry)
         k += 1
     pd_df = pd.DataFrame(data)
@@ -107,8 +109,8 @@ def gen_coll_from_csvlist(csvlist="all-museums.csv", indices=[]):
     return tot
 
 	
-def gen_data_from_csvlist(csvlist, indices=[]):
+def gen_data_from_csvlist(csvlist, indices=[], nodesc=False):
     df = pd.read_csv(os.path.join("files", csvlist))
     for index, row in df.iterrows():
         if index in indices:
-            csv_for_coll(csvlist.split(".")[0] + "-" + row[1], row[2], row[3])
+            csv_for_coll(csvlist.split(".")[0] + "-" + row[1], row[2], row[3], nodesc)
