@@ -24,5 +24,6 @@ if __name__ == '__main__':
 	
 	count = 0
 	print("Generating collections list from", filename)
+	count = gen_coll_from_csvlist(filename, indices)
 	indices_str = "all" if len(indices) == 0 else str(len(indices))
 	print("Generated", count, "collections for", indices_str, "museums")
