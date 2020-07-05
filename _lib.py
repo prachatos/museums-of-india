@@ -8,6 +8,30 @@ import re, os
 
 BASE_URI = "http://museumsofindia.gov.in"
 
+def gen_museum_list_new(museum):
+    i = 1
+    REPOS_URI = BASE_URI + "/repository/collection/fetchCategories?collectionType=ObjectType&pageNo="
+    CONT_URI = BASE_URI + "/collection/fetchRecords?collectionType=ObjectType&collectionCategory="
+    coll_list = []
+    url_list = []
+    while True:
+        composed_uri = REPOS_URI + str(i) + "&museum=" + museum + "&category="
+        page = requests.get(composed_uri)
+        text_json = json.loads(str(page.content.decode("utf-8")))
+        entries = len(list(text_json.keys()))
+        print(entries)
+        if entries == 0:
+            break
+        for t in text_json.keys():
+            coll_list.append(t)
+            url_list.append(CONT_URI + t + "&pageNo=1&museum=im_kol")
+        i += 1
+    
+    df = pd.DataFrame(url_list, index=coll_list, columns=["url"])
+    df.index.name = "name"
+    df.to_csv(open(museum + ".csv", "w+"))
+    return
+
 def gen_museum_list(museum):
     REPOS_URI = BASE_URI + "/repository/search/" + museum + "/collection/object_type"
     init = 1
