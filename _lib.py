@@ -8,10 +8,12 @@ import re, os
 
 BASE_URI = "http://museumsofindia.gov.in"
 
-def gen_museum_list_new(museum):
+
+def gen_museum_list(museum):
     i = 1
-    REPOS_URI = BASE_URI + "/repository/collection/fetchCategories?collectionType=ObjectType&pageNo="
-    CONT_URI = BASE_URI + "/collection/fetchRecords?collectionType=ObjectType&collectionCategory="
+    count = 0
+    REPOS_URI = "http://museumsofindia.gov.in/repository/collection/fetchCategories?collectionType=ObjectType&pageNo="
+    CONT_URI = "http://museumsofindia.gov.in/repository/collection/fetchRecords?collectionType=ObjectType&collectionCategory="
     coll_list = []
     url_list = []
     while True:
@@ -19,44 +21,16 @@ def gen_museum_list_new(museum):
         page = requests.get(composed_uri)
         text_json = json.loads(str(page.content.decode("utf-8")))
         entries = len(list(text_json.keys()))
-        print(entries)
+        count += entries
         if entries == 0:
             break
-        for t in text_json.keys():
-            coll_list.append(t)
-            url_list.append(CONT_URI + t + "&pageNo=1&museum=im_kol")
+        for k, v in text_json.items():
+            coll_list.append(k)
+            url_list.append([CONT_URI + k + "&pageNo=1&museum=im_kol", int(v)])
         i += 1
     
-    df = pd.DataFrame(url_list, index=coll_list, columns=["url"])
+    df = pd.DataFrame(url_list, index=coll_list, columns=["url", "count"])
     df.index.name = "name"
-    df.to_csv(open(museum + ".csv", "w+"))
-    return
-
-def gen_museum_list(museum):
-    REPOS_URI = BASE_URI + "/repository/search/" + museum + "/collection/object_type"
-    init = 1
-    stride = 50
-    runs = 0
-    url_list = []
-    coll_list = []
-    count = 0
-    while runs < 50:
-        composed_uri = REPOS_URI + '/' + str(init) + '/' + str(stride)
-        tree_m = html.fromstring(requests.get(composed_uri).content)
-        all_titles = tree_m.find_class('title_bg')
-        if not all_titles:
-            break
-        for t in all_titles:
-            count += 1
-            coll_name = str(t.text_content()).split("(")[0].strip()
-            lim = int(str(t.text_content()).split("(")[1].strip().replace(")", "").split(":")[1])
-            url_t = BASE_URI + str(t.cssselect('a')[0].get('href')).rsplit("/", 1)[0] + "/" + str(lim + 10)
-            url_list.append([coll_name, url_t, lim])
-        init += stride
-        stride = 1
-        runs += 1
-    df = pd.DataFrame(url_list, columns=["name", "url", "entries"])
-    df.index.name = "index"
     os.makedirs("files", exist_ok=True)
     df.to_csv(os.path.join("files", museum + ".csv"))
     print("Writing to", os.path.join("files", museum + ".csv"))
