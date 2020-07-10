@@ -1,7 +1,7 @@
 from _lib import gen_all_museums
 import sys
 
-
+# deprecated, please download the file from repo
 if __name__ == '__main__':
 	count = 0
 	if len(sys.argv) > 1:
