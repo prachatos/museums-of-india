@@ -4,7 +4,7 @@ import urllib.request
 import requests
 from lxml import html
 import pandas as pd
-import re, os
+import re, os, shutil
 
 BASE_URI = "http://museumsofindia.gov.in"
 
@@ -36,7 +36,59 @@ def gen_museum_list(museum):
     print("Writing to", os.path.join("files", museum + ".csv"))
     return count
 
+def coll_meta_list(coll_name, coll_url, min_page=1, max_page=9999):
+    cur_page_no = int(coll_url.split("pageNo")[1].split("&")[0].replace("=", ""))
+    coll_url = coll_url.replace("pageNo="+str(cur_page_no), "pageNo="+str(min_page))
+    cur_page_no = min_page
+    data = []
+    while True:
+        page = requests.get(coll_url)
+        text_json = json.loads(str(page.content.decode("utf-8",errors='replace')))
+        entries = len(text_json["listOfResult"])
+        data += (text_json["listOfResult"])
+        cur_page_no += 1
+        coll_url = coll_url.replace("pageNo="+str(cur_page_no-1), "pageNo="+str(cur_page_no))
+        if entries < 16 or cur_page_no > max_page: break
+    return data, min_page, cur_page_no - 1
+    
+def pic_for_record(record_no, img_url):
+    r = requests.get(img_url, stream = True)
+    with open(record_no+".jpg",'wb') as f:
+        shutil.copyfileobj(r.raw, f)
 
+def data_for_record(record_no):
+    record_url = "http://museumsofindia.gov.in/repository/record/" + record_no
+    page = requests.get(record_url)
+    tree = html.fromstring(page.content)
+    key = tree.cssselect('th')
+    value = tree.cssselect('td')
+    key_l = [k.text_content() for k in key]
+    value_l = [v.text_content().replace("\r", "").replace("\n", "") for v in value]
+    return dict(zip(key_l, value_l))
+
+def data_for_coll(coll_name, clist, min_page=1, max_page=9999):
+    data_list = []
+    for c in clist:
+        print("Downloading data for", c["recordIdentifier"])
+        data_list.append(data_for_record(c["recordIdentifier"]))
+    pd_df = pd.DataFrame(data_list)
+    pd_df.to_csv(re.sub(r"\s+", '-', coll_name) + "-" + str(min_page) + "-" + str(max_page) + ".csv", index=False)
+
+def image_for_coll(clist):
+    data_list = []
+    for c in clist:
+        print("Downloading image for", c["recordIdentifier"])
+        pic_for_record(c["recordIdentifier"], c["displayImage"])
+
+def download_coll(coll_name, coll_url, min_page=1, max_page=9999, data=True, image=False):
+    # first download meta info
+    print("Downloading meta information about collection")
+    clist, min_page, max_page = coll_meta_list(coll_name, coll_url, min_page, max_page)
+    if data:
+        data_for_coll(coll_name, clist, min_page, max_page)
+    if image:
+        image_for_coll(clist)
+	
 def csv_for_coll(coll_name, coll_url, to=0, nodesc=False):
     # Reason why a "from" parameter isn't supported:
     # The parameters for the website have the pattern x/y/z
