@@ -9,7 +9,7 @@ import re, os, shutil
 BASE_URI = "http://museumsofindia.gov.in"
 
 
-def gen_museum_list(museum):
+def gen_coll_list(museum):
     i = 1
     count = 0
     REPOS_URI = "http://museumsofindia.gov.in/repository/collection/fetchCategories?collectionType=ObjectType&pageNo="
@@ -155,7 +155,7 @@ def gen_coll_from_csvlist(csvlist="all-museums.csv", indices=[]):
     tot = 0
     for index, row in df.iterrows():
         if len(indices) == 0 or index in indices:
-            tot += (gen_museum_list(row["id"]))
+            tot += (gen_coll_list(row["id"]))
     return tot
 
 	
@@ -163,4 +163,4 @@ def gen_data_from_csvlist(csvlist, indices=[], nodesc=False):
     df = pd.read_csv(os.path.join("files", csvlist))
     for index, row in df.iterrows():
         if index in indices:
-            csv_for_coll(csvlist.split(".")[0] + "-" + row[1], row[2], row[3], nodesc)
+            gen_coll_list(csvlist.split(".")[0] + "-" + row[1], row[2], row[3], nodesc)
