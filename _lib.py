@@ -159,8 +159,8 @@ def gen_coll_from_csvlist(csvlist="all-museums.csv", indices=[]):
     return tot
 
 	
-def gen_data_from_csvlist(csvlist, indices=[], nodesc=False):
+def gen_data_from_csvlist(csvlist, indices, min_page, max_page, data, image):
     df = pd.read_csv(os.path.join("files", csvlist))
     for index, row in df.iterrows():
         if index in indices:
-            gen_coll_list(csvlist.split(".")[0] + "-" + row[1], row[2], row[3], nodesc)
+            download_coll(csvlist.split(".")[0] + "-" + row[1], row[2], row[3], min_page, max_page, data, image)
