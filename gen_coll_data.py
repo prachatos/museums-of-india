@@ -22,12 +22,23 @@ if __name__ == '__main__':
 	except Exception:
 		indices = []
 	try:
-		nodesc = bool(int(config_parser.get('file', 'nodesc')))
+		max_page = int(config_parser.get('file', 'max_page')
 	except Exception:
-		nodesc = False
-	
+		max_page = 9999
+	try:
+		min_page = int(config_parser.get('file', 'min_page')
+	except Exception:
+		min_page = 0
+	try:
+		data = bool(int(config_parser.get('file', 'data')))
+	except Exception:
+		data = False
+	try:
+		image = bool(int(config_parser.get('file', 'image')))
+	except Exception:
+		image = False
 	count = 0
 	print("Generating data list from", filename)
-	count = gen_data_from_csvlist(filename, indices, nodesc)
+	count = gen_data_from_csvlist(filename, indices,  min_page, max_page, data, image)
 	indices_str = "all" if len(indices) == 0 else str(len(indices))
 	print("Generated", count, "data items for", indices_str, "collections")
