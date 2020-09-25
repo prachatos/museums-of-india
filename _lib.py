@@ -163,4 +163,4 @@ def gen_data_from_csvlist(csvlist, indices, min_page, max_page, data, image):
     df = pd.read_csv(os.path.join("files", csvlist))
     for index, row in df.iterrows():
         if index in indices:
-            download_coll(csvlist.split(".")[0] + "-" + row[1], row[2], row[3], min_page, max_page, data, image)
+            download_coll(csvlist.split(".")[0] + "-" + row[0], row[1], min_page, max_page, data, image)
