@@ -26,7 +26,7 @@ def gen_coll_list(museum):
             break
         for k, v in text_json.items():
             coll_list.append(k)
-            url_list.append([CONT_URI + k + "&pageNo=1&museum=im_kol", int(v)])
+            url_list.append([CONT_URI + k + "&pageNo=1&museum=" + museum, int(v)])
         i += 1
     
     df = pd.DataFrame(url_list, index=coll_list, columns=["url", "count"])
