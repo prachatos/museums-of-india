@@ -160,7 +160,9 @@ def gen_coll_from_csvlist(csvlist="all-museums.csv", indices=[]):
 
 	
 def gen_data_from_csvlist(csvlist, indices, min_page, max_page, data, image):
+    indices = [i-1 for i in indices]
     df = pd.read_csv(os.path.join("files", csvlist))
     for index, row in df.iterrows():
-        if index in indices:
+        if index in indices or len(indices) == 0:
+            print('Downloading collection ' + row[0])
             download_coll(csvlist.split(".")[0] + "-" + row[0], row[1], min_page, max_page, data, image)
