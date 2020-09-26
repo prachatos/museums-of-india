@@ -43,6 +43,10 @@ if __name__ == '__main__':
         image = bool(int(config_parser.get('file', 'image')))
     except Exception:
         image = False
+    try:
+        nodesc = bool(int(config_parser.get('file', 'nodesc')))
+    except Exception:
+        nodesc = False
     count = 0
     print ('Generating data list from', filename)
     count = gen_data_from_csvlist(
@@ -52,7 +56,12 @@ if __name__ == '__main__':
         max_page,
         data,
         image,
+        nodesc,
         )
     indices_str = ('all' if len(indices) == 0 else str(len(indices)))
-    print ('Generated', count, 'data items for', indices_str,
+    if data:
+        print ('Generated data items for', indices_str,
+           'collections')
+    if image:
+        print ('Generated images for', indices_str,
            'collections')
