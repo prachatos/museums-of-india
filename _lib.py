@@ -53,10 +53,10 @@ def coll_meta_list(coll_name, coll_url, min_page=1, max_page=9999):
     
 def pic_for_record(record_no, img_url):
     r = requests.get(img_url, stream = True)
-    with open(record_no+".jpg",'wb') as f:
+    with open(os.path.join('files', record_no+".jpg"),'wb') as f:
         shutil.copyfileobj(r.raw, f)
 
-def data_for_record(record_no):
+def data_for_record(record_no, nodesc=False):
     record_url = "http://museumsofindia.gov.in/repository/record/" + record_no
     page = requests.get(record_url)
     tree = html.fromstring(page.content)
@@ -64,15 +64,22 @@ def data_for_record(record_no):
     value = tree.cssselect('td')
     key_l = [k.text_content() for k in key]
     value_l = [v.text_content().replace("\r", "").replace("\n", "") for v in value]
+    if nodesc:
+        desc_idx = [i for i in range(len(key_l)) if key_l[i].lower().find('description') != -1]
+        for idx in desc_idx:
+            key_l.pop(idx)
+            value_l.pop(idx)
     return dict(zip(key_l, value_l))
 
-def data_for_coll(coll_name, clist, min_page=1, max_page=9999):
+def data_for_coll(coll_name, clist, min_page=1, max_page=9999, nodesc=False):
     data_list = []
     for c in clist:
         print("Downloading data for", c["recordIdentifier"])
-        data_list.append(data_for_record(c["recordIdentifier"]))
+        data_list.append(data_for_record(c["recordIdentifier"], nodesc))
     pd_df = pd.DataFrame(data_list)
-    pd_df.to_csv(re.sub(r"\s+", '-', coll_name) + "-" + str(min_page) + "-" + str(max_page) + ".csv", index=False)
+    pd_df.to_csv(os.path.join("files", re.sub(r"\s+", '-', coll_name) + "-" + str(min_page) + "-" + str(max_page) + ".tsv"),
+                     index=False, sep="\t")
+    print("Writing to", os.path.join("files",  re.sub(r"\s+", '-', coll_name) + "-" + str(min_page) + "-" + str(max_page) + ".tsv"))
 
 def image_for_coll(clist):
     data_list = []
@@ -80,12 +87,12 @@ def image_for_coll(clist):
         print("Downloading image for", c["recordIdentifier"])
         pic_for_record(c["recordIdentifier"], c["displayImage"])
 
-def download_coll(coll_name, coll_url, min_page=1, max_page=9999, data=True, image=False):
+def download_coll(coll_name, coll_url, min_page=1, max_page=9999, data=True, image=False, nodesc=False):
     # first download meta info
     print("Downloading meta information about collection")
     clist, min_page, max_page = coll_meta_list(coll_name, coll_url, min_page, max_page)
     if data:
-        data_for_coll(coll_name, clist, min_page, max_page)
+        data_for_coll(coll_name, clist, min_page, max_page, nodesc)
     if image:
         image_for_coll(clist)
 	
@@ -159,10 +166,10 @@ def gen_coll_from_csvlist(csvlist="all-museums.csv", indices=[]):
     return tot
 
 	
-def gen_data_from_csvlist(csvlist, indices, min_page, max_page, data, image):
+def gen_data_from_csvlist(csvlist, indices, min_page, max_page, data, image, nodesc):
     indices = [i-1 for i in indices]
     df = pd.read_csv(os.path.join("files", csvlist))
     for index, row in df.iterrows():
         if index in indices or len(indices) == 0:
             print('Downloading collection ' + row[0])
-            download_coll(csvlist.split(".")[0] + "-" + row[0], row[1], min_page, max_page, data, image)
+            download_coll(csvlist.split(".")[0] + "-" + row[0], row[1], min_page, max_page, data, image, nodesc)
