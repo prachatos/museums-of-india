@@ -64,6 +64,8 @@ def data_for_record(record_no, nodesc=False):
     value = tree.cssselect('td')
     key_l = [k.text_content() for k in key]
     value_l = [v.text_content().replace("\r", "").replace("\n", "") for v in value]
+    key_l = key_l + ["URL"]
+    value_l = value_l + [record_url]
     if nodesc:
         desc_idx = [i for i in range(len(key_l)) if key_l[i].lower().find('description') != -1]
         for idx in desc_idx:
